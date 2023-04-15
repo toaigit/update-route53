@@ -1,0 +1,15 @@
+#!/bin/bash
+#  Update the DNS records for your EC2 instance
+
+. ./global.env
+
+eval "echo \"$(cat pub-dns.sed)\"" > pub-dns.file
+eval "echo \"$(cat pub-dns.sed)\"" > prv-dns.file
+sed -f pub-dns.file pub-dns.json.templ > pub-dns.json
+sed -f prv-dns.file prv-dns.json.templ > priv-dns.json
+rm pub-dns.file prv-dns.file
+
+aws route53 change-resource-record-sets --hosted-zone-id $PRV_ZONE --change-batch file://priv-dns.json
+aws route53 change-resource-record-sets --hosted-zone-id $PUB_ZONE --change-batch file://pub-dns.json
+
+rm pub-dns.json priv-dns.json
